@@ -8,7 +8,8 @@ const image = new mongoose.Schema ({
             id : String,
             delievery : String,
             statuscolor : String,
-            dropcolor : String
+            dropcolor : String,
+            email : String,
 })
 const Image = new mongoose.model("ImagePath", image);
 module.exports = Image;

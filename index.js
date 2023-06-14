@@ -15,8 +15,8 @@ const bodyparser = require("body-parser");
 app.use(bodyparser.urlencoded({ extended: false }));
 app.use(bodyparser.json());
 
-app.listen(3000, () => {
-  console.log("Server is runnig on the 3000");
+app.listen(3001, () => {
+  console.log("Server is runnig on the 3001");
 });
 mongoose.connect(
   "mongodb+srv://mrijaz4575:daniyal4575@ecommerce.d0ymki1.mongodb.net/?retryWrites=true&w=majority",
@@ -65,37 +65,62 @@ app.use("/checkout", async (req, res) => {
   res.json({ error, status });
 });
 app.post("/add", async (req, res) => {
-    const key = uuid();
-    console.log(key);
+  const key = uuid();
+  console.log(key);
   const { base64 } = req.body;
   const { code } = req.body;
   const { status } = req.body;
   const { name } = req.body;
+  const { email } = req.body;
   console.log(code);
   try {
     const user = new Image({
       image: base64,
-      code : code,
-      status : status,
-      name : name,
-      id : key,
-      delievery : "not yet",
-      statuscolor : "btn btn-primary",
-      dropcolor : "btn btn-primary"
+      code: code,
+      status: status,
+      name: name,
+      id: key,
+      delievery: "not yet",
+      statuscolor: "btn btn-primary",
+      dropcolor: "btn btn-primary",
+      email: email,
     });
     user.save();
-    res.send("Data Inserted");
-
+    res.send("Added");
   } catch (error) {
     res.status(500).send(error);
   }
 });
 
-app.get("/getImage", async (reg, res) => {
+// app.get("/getCustomerData", async (reg, res) => {
+//   try {
+//     const email = req.query.email;
+//     console.log(email);
 
+//     const data = Image.find({ email: email }.populate("data"));
+//     res.json({ image: data });
+
+//   } catch (err) {
+//     res.status(400).json("Error: " + err);
+//   }
+// });
+
+app.get('/getCustomerData/:email', async (req, res) => {
+  try {
+    const email = req.params.email;
+    console.log(email);
+    const user = await Image.find({ email: req.params.email });
+    res.json({image: user});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+
+app.get("/getImage", async (reg, res) => {
   try {
     Image.find().then((user) => {
-   
       res.json({ image: user });
     });
   } catch (err) {
@@ -104,25 +129,27 @@ app.get("/getImage", async (reg, res) => {
 });
 
 app.post("/update", async (req, res) => {
-  try{
-  console.log("req.body", req.body);
- 
-  var _id = req.body.id;
-  var data = {
-    name: req.body.name,
-    base64: req.body.base64,
-    code: req.body.code,
-    status: req.body.status,
-    delievery : req.body.delievery,
-    statuscolor : req.body.statuscolor,
-    dropcolor : req.body.dropcolor
-  };
+  try {
+    console.log("req.body", req.body);
 
-  const updatedResult =  await Image.findByIdAndUpdate(_id, data, { new: true }); 
-      res.json({status : "Updated "})
-    } catch (error) {
-      console.log(error);
-    }
+    var _id = req.body.id;
+    var data = {
+      name: req.body.name,
+      base64: req.body.base64,
+      code: req.body.code,
+      status: req.body.status,
+      delievery: req.body.delievery,
+      statuscolor: req.body.statuscolor,
+      dropcolor: req.body.dropcolor,
+    };
+
+    const updatedResult = await Image.findByIdAndUpdate(_id, data, {
+      new: true,
+    });
+    res.json({ status: "Updated " });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 module.exports = app;
