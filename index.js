@@ -3,14 +3,16 @@ var app = express();
 var mongoose = require("mongoose");
 var cors = require("cors");
 const uuid = require("uuid").v4;
-// let path = require("path");
+
 const Image = require("./schema");
+const DropIn = require("./dropin");
+
 var multer = require("multer");
 app.use(cors());
 const stripe = require("stripe")(
   "sk_test_51NFVMtSBa1DPoKnkcMqBNlLduWL2yMAx8qLAZJ3sDJ09ETEjTWZSxdAuuWU21xrWnY0sOmrsOfKUSE2sdJIQc45x00OqhmAwsl"
 );
-// require('dotenv').config();
+
 const bodyparser = require("body-parser");
 app.use(bodyparser.urlencoded({ extended: false }));
 app.use(bodyparser.json());
@@ -92,31 +94,26 @@ app.post("/add", async (req, res) => {
   }
 });
 
-// app.get("/getCustomerData", async (reg, res) => {
-//   try {
-//     const email = req.query.email;
-//     console.log(email);
-
-//     const data = Image.find({ email: email }.populate("data"));
-//     res.json({ image: data });
-
-//   } catch (err) {
-//     res.status(400).json("Error: " + err);
-//   }
-// });
-
-app.get('/getCustomerData/:email', async (req, res) => {
+app.get("/getbyId/:id", async (req, res) => {
   try {
-    const email = req.params.email;
-    console.log(email);
-    const user = await Image.find({ email: req.params.email });
-    res.json({image: user});
+    const user = await Image.find({ _id: req.params.id });
+    res.json({ image: user });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 });
 
+app.get("/getCustomerData/:email", async (req, res) => {
+  try {
+    const email = req.params.email;
+    const user = await Image.find({ email: req.params.email });
+    res.json({ image: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
 
 app.get("/getImage", async (reg, res) => {
   try {
@@ -134,12 +131,12 @@ app.post("/update", async (req, res) => {
 
     var _id = req.body.id;
     var data = {
-      name: req.body.name,
-      base64: req.body.base64,
-      code: req.body.code,
-      status: req.body.status,
+      // name: req.body.name,
+      // base64: req.body.base64,
+      // code: req.body.code,
+      // status: req.body.status,
       delievery: req.body.delievery,
-      statuscolor: req.body.statuscolor,
+      // statuscolor: req.body.statuscolor,
       dropcolor: req.body.dropcolor,
     };
 
@@ -149,6 +146,64 @@ app.post("/update", async (req, res) => {
     res.json({ status: "Updated " });
   } catch (error) {
     console.log(error);
+  }
+});
+app.post("/updateStatus", async (req, res) => {
+  try {
+    console.log("req.body", req.body);
+
+    var _id = req.body.id;
+    var data = {
+      // name: req.body.name,
+      // base64: req.body.base64,
+      // code: req.body.code,
+      status: req.body.status,
+      // delievery: req.body.delievery,
+      statuscolor: req.body.statuscolor,
+      // dropcolor: req.body.dropcolor,
+    };
+
+    const updatedResult = await Image.findByIdAndUpdate(_id, data, {
+      new: true,
+    });
+    res.json({ status: "Updated" });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+app.post("/dropout", async (req, res) => {
+  try {
+    console.log("req.body", req.body);
+
+    var _id = req.body.id;
+    var myquery = { id: req.body.id };
+    const updatedResult = await DropIn.deleteOne(myquery);
+    res.json({ status: "Deleted" });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+app.post("/dropin", async (req, res) => {
+  const { id } = req.body;
+  const { date } = req.body;
+  const { time } = req.body;
+  const { address } = req.body;
+  const { email } = req.body;
+
+  try {
+    const user = new DropIn({
+      id: id,
+      date: date,
+      time: time,
+      address: address,
+      email: email,
+    });
+    user.save();
+    res.send("Added");
+  } catch (error) {
+    res.status(500).send(error);
   }
 });
 
