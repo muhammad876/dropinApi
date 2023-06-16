@@ -82,7 +82,7 @@ app.post("/add", async (req, res) => {
       status: status,
       name: name,
       id: key,
-      delievery: "not yet",
+      delievery: "Dropin",
       statuscolor: "btn btn-primary",
       dropcolor: "btn btn-primary",
       email: email,
@@ -174,10 +174,7 @@ app.post("/updateStatus", async (req, res) => {
 
 app.post("/dropout", async (req, res) => {
   try {
-    console.log("req.body", req.body);
-
-    var _id = req.body.id;
-    var myquery = { id: req.body.id };
+   var myquery = { customerId: req.body.id };
     const updatedResult = await DropIn.deleteOne(myquery);
     res.json({ status: "Deleted" });
   } catch (error) {
@@ -194,7 +191,7 @@ app.post("/dropin", async (req, res) => {
 
   try {
     const user = new DropIn({
-      id: id,
+      customerId: id,
       date: date,
       time: time,
       address: address,
